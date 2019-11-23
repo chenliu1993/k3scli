@@ -23,9 +23,9 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: 
-        name: env setting
-        command: go get -v -t -d ./...
+          name: env setting
+          command: go get -v -t -d ./...
       # - run: go test -v ./...
       - run:
-        name: building
-        command: go build main.go        
+          name: building
+          command: go build main.go        
