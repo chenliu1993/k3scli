@@ -1,0 +1,6 @@
+# three node (two workers) cluster config
+cluster_name: k3scluster
+nodes:
+ - role: worker
+ - role: worker
+ - role: server
