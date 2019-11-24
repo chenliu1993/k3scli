@@ -92,3 +92,16 @@ func InspectContainerIP(containerID string) (string, error) {
 	}
 	return ctrCmd.Inspect()
 }
+
+func ExecInContainer(containerID, cmd string, detach bool) (err error) {
+	ctrCmd := docker.ContainerCmd{
+		ID: containerID,
+		Command: "docker",
+	}
+	ctrCmd.Detach = detach
+	ctrCmd.Args = []string{
+			"sh", "-c",
+			cmd,
+	}
+	return ctrCmd.Exec()
+}
