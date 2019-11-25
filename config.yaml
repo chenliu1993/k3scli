@@ -4,3 +4,5 @@ nodes:
  - role: worker
  - role: worker
  - role: server
+ - role: worker
+ - role: worker
