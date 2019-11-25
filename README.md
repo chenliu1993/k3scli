@@ -26,7 +26,7 @@
 	There are also some container-level functions like run/attach/kill a container, but it is just a wrap-use of docker with some options set to k3s's default values.
 
 ## TODO:
-	1. suport multiservers.
+	1. support multiservers.
 	2. worker roles show-up.
 	3. pack neccessary images in tar format like kind.
 ## STUCK:	

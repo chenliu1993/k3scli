@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"os"
 	"os/exec"
+	"strings"
 	"path/filepath"
 	"io/ioutil"
 	"strings"
@@ -42,7 +43,7 @@ func GetServerToken(containerID string) (string, error) {
 		return "", err
 	}
 	tokenStr := strings.Replace(string(bytes), "\n", "", -1)
-	return string(tokenStr), nil
+	return strings.TrimSpace(string(tokenStr)), nil
 }
 
 // GetServerIP get server internal IP through docker inspect

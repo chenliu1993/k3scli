@@ -7,8 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 const (
-	NODE_VERSION = "0.10"
-	// NODE_VERSION = "allsetup"
+	// NODE_VERSION = "0.10"
+	NODE_VERSION = "allsetup"
 	NODE_IMAGE = "cliu2/k3snode:"+NODE_VERSION
 
 	BASE_VERSION = "0.10"
