@@ -9,7 +9,6 @@ import (
 	"strings"
 	"path/filepath"
 	"io/ioutil"
-	"strings"
 	log "github.com/sirupsen/logrus"
 	docker "github.com/chenliu1993/k3scli/pkg/dockerutils"
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
