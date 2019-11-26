@@ -2,7 +2,11 @@
 FROM alpine:3.10
 
 MAINTAINER LIUCHEN
+
 COPY files/ /
+RUN mkdir -p /k3s
+COPY images/ /k3s
+
 RUN apk update; \
 	apk add --no-cache --virtual .build-deps \
         	iptables iproute2 ethtool socat util-linux ebtables udev kmod \

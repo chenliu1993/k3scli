@@ -16,29 +16,22 @@ func (c *ContainerCmd) Exec() error {
 	}
 	if c.Detach {
 		args = append(args, "-d")
-		args = append(args, c.ID)
-		args = append(args, c.Args...)
-		cmd := exec.Command(c.Command, args...)
-		lines, err := ExecOutput(*cmd, true)
-		if err != nil {
-			return err
-		}
-		PrintOutput(lines)
-	}else{
+	} else {
 		args = append(args, "-it")
-		args = append(args, c.ID)
-		args = append(args, c.Args...)
-		cmd := exec.Command(c.Command, args...)
-		// applies to the docker -i options
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		log.Debug(fmt.Sprintf("begin exec process in container: %s", c.ID))
-		err := cmd.Run()
-		if err != nil {
-			log.Debug(err)
-			return err
-		}
+	}
+	args = append(args, c.ID)
+	args = append(args, c.Args...)
+	cmd := exec.Command(c.Command, args...)
+	fmt.Print(cmd)
+	fmt.Print("\n")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	log.Debug(fmt.Sprintf("begin exec process in container: %s", c.ID))
+	err := cmd.Run()
+	if err != nil {
+		log.Debug(err)
+		return err
 	}
 	return nil
 }

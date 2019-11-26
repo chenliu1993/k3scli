@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"context"
-
+        "time"
 	"github.com/chenliu1993/k3scli/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -68,7 +68,11 @@ func join(ctx context.Context, containerID, serverID string, detach bool) error 
                 return err
         }
         // Second join to server container
-        return utils.Join(containerID, server, token, detach)
+        if err := utils.Join(containerID, server, token, detach); err != nil {
+                return err
+        }
+        time.Sleep(2*time.Second)
+        return utils.LoadImages(containerID)
 }
 
 	

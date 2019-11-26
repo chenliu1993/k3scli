@@ -3,7 +3,7 @@ package cmd
 import (
 	"strings"
 	"context"
-
+	"time"
 	"github.com/chenliu1993/k3scli/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -85,5 +85,19 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 	if cluster == "" {
 		log.Debug("no cluster specified")
 	}
-	return utils.RunContainer(containerID, label, detach, image, ports, cluster)
+	if err := utils.RunContainer(containerID, label, detach, image, ports, cluster); err != nil {
+		return err
+	}
+	if label == "server" {
+		err := utils.StartK3S(containerID)
+		if err != nil {
+			return err
+		}
+		time.Sleep(2*time.Second)
+		err = utils.LoadImages(containerID) 
+		if err != nil {
+			return err
+		}
+	} 
+	return nil
 }

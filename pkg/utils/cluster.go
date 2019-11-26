@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"time"
 	log "github.com/sirupsen/logrus"
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
 )
@@ -12,11 +13,19 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	var name string
 	// First running server container
 	serverName := GenCtrName()
-	err = RunContainer(serverName, "server", true, NODE_IMAGE, []string{"6443"}, clusterName)
+	err = RunContainer(serverName, "server", true, BASE_IMAGE, []string{"6443"}, clusterName)
 	if err != nil {
 		return err
 	}
-
+	err = StartK3S(serverName)
+	if err != nil {
+		return err
+	}
+	time.Sleep(2*time.Second)
+	err = LoadImages(serverName) 
+	if err != nil {
+		return err
+	}
 	cluster.Nodes[0].Name = serverName
 	server, err := GetServerIP(serverName)
 	if err != nil {
@@ -26,10 +35,10 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
+	
 	// Second join worker nodes one-by-one
 	// Join(containerID, server, token, detach)
 	// Server node must on the first place of config file
-
 	for _, node := range cluster.Nodes[1:] {
 		// First run container then join container
 		name = GenCtrName()
@@ -41,7 +50,13 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 		if err := Join(name, server, serverToken, true); err != nil {
 			return err
 		}
+		time.Sleep(2*time.Second)
+		err = LoadImages(name) 
+		if err != nil {
+			return err
+		}
 	}
+	
 	return nil
 }
 
