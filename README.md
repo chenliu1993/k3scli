@@ -8,6 +8,9 @@
 	```console
 	go build main.go.
 	```
+## Dependency
+	Before k3snode/k3sbase:0.11, k3scli will use two different images to start up a container. k3snode will serve as server while k3sbase will server as worker. But k3s in k3snode depends heavily on k8s.gcr.io images(pause:3.1). Developers in China cannot pull this image which is really annoying. So k3sbase:0.11 is decided, with k3s needed images present in it. Each time start up a server, ctr in k3sbase:0.11 will load the image tars therefore avoiding GFW issue. 
+	Besides now server and worker can be both started up based on k3sbase:0.11. Although volumes of image is enlarged, but I think it is worth it.
 
 ## Usage
 	To create a cluster, just use:
@@ -27,7 +30,10 @@
 
 ## TODO:
 	1. support multiservers.
-	2. worker roles show-up.
-	3. pack neccessary images in tar format like kind.
+	2. worker roles show-up (k3s without container does not show up worker roles too).
+	3. pack neccessary images in tar format like kind (done).
+	4. remove docker support to use containerd?
 ## STUCK:	
 	China's GFW.
+
+
