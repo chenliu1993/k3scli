@@ -11,7 +11,7 @@ const (
 	NODE_VERSION = "withimages"
 	NODE_IMAGE = "cliu2/k3snode:"+NODE_VERSION
 
-	BASE_VERSION = "0.10"
+	BASE_VERSION = "withimages"
 	BASE_IMAGE = "cliu2/k3sbase:"+BASE_VERSION
 )
 

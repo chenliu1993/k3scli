@@ -106,3 +106,14 @@ func LoadImages(containerID string) error {
 	}
 	return nil
 }
+
+// StartK3S	starts k3s daemon service
+func StartK3S(containerID string) error {
+	log.Debug("starting k3s server")
+	startCmd := "nohup k3s server"
+	err := ExecInContainer(containerID, startCmd, true)
+	if err != nil {
+		return err
+	}
+	return nil
+}
