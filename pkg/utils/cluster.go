@@ -16,7 +16,6 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
-
 	cluster.Nodes[0].Name = serverName
 	server, err := GetServerIP(serverName)
 	if err != nil {
@@ -26,10 +25,13 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
+	err = LoadImages(serverName) 
+	if err != nil {
+		return err
+	}
 	// Second join worker nodes one-by-one
 	// Join(containerID, server, token, detach)
 	// Server node must on the first place of config file
-
 	for _, node := range cluster.Nodes[1:] {
 		// First run container then join container
 		name = GenCtrName()
@@ -42,6 +44,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 			return err
 		}
 	}
+	
 	return nil
 }
 

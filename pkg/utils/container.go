@@ -7,8 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 const (
-	NODE_VERSION = "0.10"
-	// NODE_VERSION = "allsetup"
+	// NODE_VERSION = "0.10"
+	NODE_VERSION = "withimages"
 	NODE_IMAGE = "cliu2/k3snode:"+NODE_VERSION
 
 	BASE_VERSION = "0.10"
@@ -33,6 +33,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 	if label != "" {
 		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
 	}
+	
 	ctrCmd.Detach = detach
 	ctrCmd.Image = image
 	return ctrCmd.Run()
@@ -103,5 +104,6 @@ func ExecInContainer(containerID, cmd string, detach bool) (err error) {
 			"sh", "-c",
 			cmd,
 	}
+	// fmt.Print(ctrCmd.Args)
 	return ctrCmd.Exec()
 }

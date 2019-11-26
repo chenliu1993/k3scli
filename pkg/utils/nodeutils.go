@@ -14,8 +14,12 @@ import (
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
 )
 
-// This file contains some node related functions like get server's ip and token
 
+const (
+	DefaultArchivesPath = "/k3s"
+	DefaultContainerdSock = "/run/k3s/containerd/containerd.sock"
+)
+// This file contains some node related functions like get server's ip and token
 
 // func Init() {
 // 	file, err := os.Open("/dev/urandom")
@@ -87,4 +91,18 @@ func GetClusterNames(clusterName string) (lines []string, err error) {
 // Generate container a unique container name 
 func GenCtrName() string {
 	return uuid.New().String()
+}
+
+// LoadImages use ctr to load images that is in the form of tar
+func LoadImages(containerID string) error {
+	log.Debug("loading images")
+	// list image tars
+	findCmd := "find "+DefaultArchivesPath+" -name *.tar"
+	loadCmd := "xargs -n1 k3s ctr -a "+DefaultContainerdSock+" images import"
+	Cmd := findCmd+" | "+loadCmd
+	err := ExecInContainer(containerID, Cmd, false)
+	if err != nil {
+		return err
+	}
+	return nil
 }
