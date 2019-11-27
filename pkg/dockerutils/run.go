@@ -36,16 +36,9 @@ func (c *ContainerCmd) Run() error {
 	}
 	if c.Detach {
 		args = append(args, "-d")
-		args = append(args, c.Image)
-		cmd := exec.Command(c.Command, args...)
-		lines, err := ExecOutput(*cmd, true)
-		if err != nil {
-			return err
-		}
-		PrintOutput(lines)
-		return nil
-	}
+	} 
 	args = append(args, c.Image)
+	// fmt.Print(args)
 	cmd := exec.Command(c.Command, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

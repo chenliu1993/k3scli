@@ -24,6 +24,10 @@ var CreateCommand = cli.Command{
 				Name:  "config",
 				Usage: `the config file used to created a cluster`,
 			},
+			&cli.StringSliceFlag{
+				Name: "expose",
+				Usage: `list of exposed ports from host to k3sbase`,
+			},
         },
         Action: func(context *cli.Context) error {
 		ctx, err := cliContextToContext(context)
@@ -31,11 +35,12 @@ var CreateCommand = cli.Command{
 			return err
 		}
 		return createcluster(ctx, context.Args().First(),
-					context.String("config"))
+					context.String("config"),
+					context.StringSlice("expose"))
         },
 }
 
-func createcluster(ctx context.Context, clusterName, config string) error {
+func createcluster(ctx context.Context, clusterName, config string, ports []string) error {
 		log.Debug("Begin creating a cluster")
 		var cluster clusterconfig.Cluster
 		var err error
@@ -52,7 +57,7 @@ func createcluster(ctx context.Context, clusterName, config string) error {
 			return cluster.Nodes[i].Label < cluster.Nodes[j].Label
 		})
 		fmt.Print(cluster.Nodes)
-        err = utils.CreateCluster(clusterName, cluster)
+        err = utils.CreateCluster(clusterName, cluster, ports)
         if err != nil {
                 log.Debug(err)
                 return err

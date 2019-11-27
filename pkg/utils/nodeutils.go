@@ -3,8 +3,9 @@ package utils
 import (
 	"fmt"
 	"time"
+	"strconv"
 	"github.com/google/uuid"
-	"os"
+	// "os"
 	"os/exec"
 	"strings"
 	"path/filepath"
@@ -32,12 +33,12 @@ const (
 func GetServerToken(containerID string) (string, error) {
 	log.Debug("read token out from k3s server files")
 	time.Sleep(10*time.Second)
-	fileInfo, err := os.Stat(filepath.Join(docker.K3sServerFile, containerID, "server"))
-	if err != nil {
-		fmt.Print(err)
-		return "", err
-	}
-	fmt.Print(fileInfo.Name())
+	// fileInfo, err := os.Stat(filepath.Join(docker.K3sServerFile, containerID, "server"))
+	// if err != nil {
+	// 	fmt.Print(err)
+	// 	return "", err
+	// }
+	// fmt.Print(fileInfo.Name())
 	// token place 
 	token := filepath.Join(docker.K3sServerFile, containerID, "server", "token")
 	bytes, err := ioutil.ReadFile(token)
@@ -116,4 +117,34 @@ func StartK3S(containerID string) error {
 		return err
 	}
 	return nil
+}
+
+// ConvertPorts convert string to int ports
+
+func ConvertFromStrToInt(strs []string) ([]int, error) {
+	var intStrs []int
+	for _, str := range strs {
+		intStr, err :=  strconv.Atoi(str)
+		if err != nil {
+			return nil ,err
+		}
+		intStrs = append(intStrs, intStr)
+	}
+	return intStrs, nil
+}
+
+func ConvertFromIntToStr(intStrs []int) ([]string) {
+	var strs []string
+	for _, intStr := range intStrs {
+		strs = append(strs, strconv.Itoa(intStr))
+	}
+	return strs
+}
+
+func AddPort(ports []int) []int {
+	var newPorts []int
+	for _, port := range ports {
+		newPorts = append(newPorts, port+1)
+	}
+	return newPorts
 }

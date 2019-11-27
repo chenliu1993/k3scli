@@ -11,7 +11,7 @@ const (
 	NODE_VERSION = "withimages"
 	NODE_IMAGE = "cliu2/k3snode:"+NODE_VERSION
 
-	BASE_VERSION = "withimages"
+	BASE_VERSION = "0.11"
 	BASE_IMAGE = "cliu2/k3sbase:"+BASE_VERSION
 )
 
@@ -33,7 +33,6 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 	if label != "" {
 		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
 	}
-	
 	ctrCmd.Detach = detach
 	ctrCmd.Image = image
 	return ctrCmd.Run()
