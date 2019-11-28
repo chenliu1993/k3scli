@@ -1,8 +1,20 @@
 # three node (two workers) cluster config
 cluster_name: k3scluster
-nodes:
- - role: worker
- - role: worker
- - role: server
- - role: worker
- - role: worker
+nodes: 
+  - name : "worker0"
+    role : "worker"
+    ports: 
+      - hostPort : "9001"
+        port : "9001"
+  - name : "server"
+    role : "server"
+    ports: 
+      - hostPort : "9002"
+        port : "9002"
+      - hostPort : "6443"
+        port : "6443"
+  - name : "worker1"
+    role : "worker"
+    ports: 
+      - hostPort : "9003"
+        port : "9003"  

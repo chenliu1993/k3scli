@@ -76,10 +76,9 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 	}
 	if ports == nil {
 		if label == "server" {
-			ports = append(ports, "6443")
+			ports = append(ports, "-p 6443:6443")
 		} else {
 			log.Debug("no ports mapping is defined")
-			ports = []string{}
 		}
 	}
 	if cluster == "" {

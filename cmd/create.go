@@ -3,7 +3,6 @@ package cmd
 // Create command does not create  a command, it is used 
 // to create a cluster
 import (
-	"fmt"
 	"sort"
 	"context"
 	"github.com/chenliu1993/k3scli/pkg/utils"
@@ -24,10 +23,7 @@ var CreateCommand = cli.Command{
 				Name:  "config",
 				Usage: `the config file used to created a cluster`,
 			},
-			&cli.StringSliceFlag{
-				Name: "expose",
-				Usage: `list of exposed ports from host to k3sbase`,
-			},
+			
         },
         Action: func(context *cli.Context) error {
 		ctx, err := cliContextToContext(context)
@@ -36,11 +32,11 @@ var CreateCommand = cli.Command{
 		}
 		return createcluster(ctx, context.Args().First(),
 					context.String("config"),
-					context.StringSlice("expose"))
+				)
         },
 }
 
-func createcluster(ctx context.Context, clusterName, config string, ports []string) error {
+func createcluster(ctx context.Context, clusterName, config string) error {
 		log.Debug("Begin creating a cluster")
 		var cluster clusterconfig.Cluster
 		var err error
@@ -56,8 +52,7 @@ func createcluster(ctx context.Context, clusterName, config string, ports []stri
 		sort.Slice(cluster.Nodes, func(i int, j int) bool {
 			return cluster.Nodes[i].Label < cluster.Nodes[j].Label
 		})
-		fmt.Print(cluster.Nodes)
-        err = utils.CreateCluster(clusterName, cluster, ports)
+        err = utils.CreateCluster(clusterName, cluster)
         if err != nil {
                 log.Debug(err)
                 return err

@@ -48,5 +48,6 @@ func (c *ContainerCmd) Run() error {
 		log.Fatal(err)
 		return err
 	}
+	
 	return nil
 }

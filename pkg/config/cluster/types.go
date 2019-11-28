@@ -24,8 +24,20 @@ type Cluster struct {
 
 // Node represents a cluster k3s node
 type Node struct {
-	Name string
+	Name string `yaml:"name"`
 	Label string `yaml:"role"`
+	Ports []Port `yaml:"ports"`
+	Pods []Pod `yaml:"pods"`
+}
+
+type Port struct {
+	Hostport string `yaml:"hostPort"`
+	Port string `yaml:"port"`
+}
+type Pod struct {
+	Image string `yaml:"image"`
+	Containerport string `yaml:"containerPort"`
+	Port string `yaml:"port"`
 }
 
 

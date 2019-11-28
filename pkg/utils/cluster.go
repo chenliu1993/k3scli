@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"time"
 	log "github.com/sirupsen/logrus"
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
@@ -9,20 +8,19 @@ import (
 
 
 // CreateCluster creates a cluster given the default name
-func CreateCluster(clusterName string, cluster clusterconfig.Cluster, ports []string) (err error) {
+func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error) {
 	log.Debug("Creating cluster...")
 	var name string
+	var serverName string
 	// First running server container
-	serverName := GenCtrName()
-	if ports == nil {
-		ports = []string{}
+	if cluster.Nodes[0].Name == "" {
+		serverName = GenCtrName()
+		cluster.Nodes[0].Name = serverName
+	} else {
+		serverName = cluster.Nodes[0].Name
 	}
 	// deal with port mapping
-	originPorts, err := ConvertFromStrToInt(ports)
-	if err != nil {
-		return err
-	}
-	serverPorts := append(ports, "6443")
+	serverPorts := GenratePortMapping(cluster.Nodes[0].Ports)
 	err = RunContainer(serverName, "server", true, BASE_IMAGE, serverPorts, clusterName)
 	if err != nil {
 		return err
@@ -36,7 +34,6 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster, ports []st
 	if err != nil {
 		return err
 	}
-	cluster.Nodes[0].Name = serverName
 	server, err := GetServerIP(serverName)
 	if err != nil {
 		return err
@@ -45,20 +42,22 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster, ports []st
 	if err != nil {
 		return err
 	}
-	var newPorts = originPorts
 	// Second join worker nodes one-by-one
 	// Join(containerID, server, token, detach)
 	// Server node must on the first place of config file
 	for _, node := range cluster.Nodes[1:] {
 		// First run container then join container
-		name = GenCtrName()
-		newPorts = AddPort(newPorts)
-		fmt.Print(newPorts)
-		err := RunContainer(name, "worker", true, BASE_IMAGE, ConvertFromIntToStr(newPorts), clusterName)	
+		if node.Name == "" {
+			name = GenCtrName()
+			node.Name = name
+		} else {
+			name = node.Name
+		}		
+		workerPorts := GenratePortMapping(node.Ports)
+		err := RunContainer(name, "worker", true, BASE_IMAGE, workerPorts, clusterName)	
 		if err != nil {
 			return err
 		}
-		node.Name = name
 		if err := Join(name, server, serverToken, true); err != nil {
 			return err
 		}
@@ -68,7 +67,6 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster, ports []st
 			return err
 		}
 	}
-	
 	return nil
 }
 

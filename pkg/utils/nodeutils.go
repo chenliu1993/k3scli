@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"time"
-	"strconv"
 	"github.com/google/uuid"
 	// "os"
 	"os/exec"
@@ -119,32 +118,12 @@ func StartK3S(containerID string) error {
 	return nil
 }
 
-// ConvertPorts convert string to int ports
-
-func ConvertFromStrToInt(strs []string) ([]int, error) {
-	var intStrs []int
-	for _, str := range strs {
-		intStr, err :=  strconv.Atoi(str)
-		if err != nil {
-			return nil ,err
-		}
-		intStrs = append(intStrs, intStr)
-	}
-	return intStrs, nil
-}
-
-func ConvertFromIntToStr(intStrs []int) ([]string) {
-	var strs []string
-	for _, intStr := range intStrs {
-		strs = append(strs, strconv.Itoa(intStr))
-	}
-	return strs
-}
-
-func AddPort(ports []int) []int {
-	var newPorts []int
+// GenratePortMapping
+func GenratePortMapping(ports []clusterconfig.Port) ([]string) {
+	var portmappings []string
 	for _, port := range ports {
-		newPorts = append(newPorts, port+1)
+		portmapping := port.Hostport+":"+port.Port
+		portmappings = append(portmappings,	portmapping)
 	}
-	return newPorts
+	return portmappings
 }

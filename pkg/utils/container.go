@@ -24,8 +24,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 	}
 	ctrCmd.Args = []string{}
 	for _, port := range ports {
-		portStr := port+":"+port
-		ctrCmd.Args = append(ctrCmd.Args, "-p", portStr)
+		ctrCmd.Args = append(ctrCmd.Args, "-p", port)
 	}
 	if cluster != "" {
 		ctrCmd.Args =  append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterLabelKey, cluster))
