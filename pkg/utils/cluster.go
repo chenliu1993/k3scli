@@ -30,7 +30,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 		return err
 	}
 	time.Sleep(2*time.Second)
-	err = LoadImages(serverName) 
+	err = LoadImages(serverName, "server") 
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 			return err
 		}
 		time.Sleep(3*time.Second)
-		err = LoadImages(name) 
+		err = LoadImages(name, "worker") 
 		if err != nil {
 			return err
 		}
@@ -85,4 +85,17 @@ func DeleteCluster(clusterName string) error {
 		}
 	}
 	return nil
+}
+
+// DeployPod deploys a pod based on a kubenetes-format yaml
+
+func DeployPod(containerID, config string) (err error) {
+	log.Debug("copying yaml file from host to container")
+	// first copy yaml file from host to container
+	err = CopyFromHostToCtr(containerID, config)
+	if err != nil {
+		return err
+	}
+	cmd := "k3s kubectl create -f "+config 
+	return ExecInContainer(containerID, cmd, true)
 }

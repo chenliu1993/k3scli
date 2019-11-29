@@ -3,8 +3,9 @@ package utils
 import (
 	"fmt"
 	"time"
+	// "bytes"
 	"github.com/google/uuid"
-	// "os"
+	"os"
 	"os/exec"
 	"strings"
 	"path/filepath"
@@ -94,15 +95,34 @@ func GenCtrName() string {
 }
 
 // LoadImages use ctr to load images that is in the form of tar
-func LoadImages(containerID string) error {
+func LoadImages(containerID string, role string) error {
 	log.Debug("loading images")
+	var findCmd string
 	// list image tars
-	findCmd := "find "+DefaultArchivesPath+" -name *.tar"
+	if role == "server" {
+		findCmd = "find "+DefaultArchivesPath+" -name *.tar"
+	} else if role == "worker" {
+		findCmd = "find "+DefaultArchivesPath+" -name *-lb.tar"
+	}
 	loadCmd := "xargs -n1 k3s ctr -a "+DefaultContainerdSock+" images import"
 	Cmd := findCmd+" | "+loadCmd
 	err := ExecInContainer(containerID, Cmd, false)
 	if err != nil {
 		return err
+	}
+	if role == "worker" {
+		findCmd = "find "+DefaultArchivesPath+" -name pause.tar"
+		Cmd := findCmd+" | "+loadCmd
+		err := ExecInContainer(containerID, Cmd, false)
+		if err != nil {
+			return err
+		}
+		findCmd = "find "+DefaultArchivesPath+" -name *traefik*.tar"
+		Cmd = findCmd+" | "+loadCmd
+		err = ExecInContainer(containerID, Cmd, false)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -126,4 +146,47 @@ func GenratePortMapping(ports []clusterconfig.Port) ([]string) {
 		portmappings = append(portmappings,	portmapping)
 	}
 	return portmappings
+}
+
+// CopyFromHostToCtr copies a file into the container
+// follow Kind
+func CopyFromHostToCtr(containerID, file string) (err error) {
+	log.Debug("get file's content into buffer...")
+	// var buff bytes.Buffer
+	current, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	// first copy host file's content into buffer
+	// cmd := exec.Command(
+	// 	"cat", filepath.Join(current, file),
+	// )
+	// cmd.Stdout = &buff
+	// if err = cmd.Run(); err != nil {
+	// 	return err
+	// }
+	// then copy from buffer to container with the same name
+	ctrCmd := docker.ContainerCmd{
+		ID: containerID,
+		Command: "docker",
+		Args: []string{"cp"},
+	}
+	ctrCmd.Detach = true
+	ctrCmd.Args = append(ctrCmd.Args, 
+					filepath.Join(current, file),
+					containerID+":/"+file,
+				)
+	cmd := exec.Command(
+		ctrCmd.Command, ctrCmd.Args...,
+	)
+	return cmd.Run()
+	// ctrCmd.Args = []string{
+	// 	"cp", "/dev/stdin",
+	// 	file,
+	// }
+	// ctrCmd.Detach = true
+	// if err = ctrCmd.Exec(&buff,nil,nil); err != nil {
+	// 	return err
+	// }
+	// return nil
 }

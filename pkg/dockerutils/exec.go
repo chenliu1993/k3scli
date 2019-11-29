@@ -2,6 +2,7 @@ package dockerutils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"bytes"
@@ -10,7 +11,7 @@ import (
 )
 
 // Exec uses docker eec to actually exec a process in a container
-func (c *ContainerCmd) Exec() error {
+func (c *ContainerCmd) Exec(in io.Reader, out, stderr io.Writer) error {
 	args := []string{
 		"exec",
 	}
@@ -24,9 +25,21 @@ func (c *ContainerCmd) Exec() error {
 	cmd := exec.Command(c.Command, args...)
 	fmt.Print(cmd)
 	fmt.Print("\n")
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if in == nil {
+		cmd.Stdin = os.Stdin
+	} else {
+		cmd.Stdin = in
+	}
+	if out == nil {
+		cmd.Stdout = os.Stdout
+	} else {
+		cmd.Stdout = out
+	}
+	if stderr == nil {
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stderr = stderr
+	}
 	log.Debug(fmt.Sprintf("begin exec process in container: %s", c.ID))
 	err := cmd.Run()
 	if err != nil {

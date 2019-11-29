@@ -93,7 +93,7 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 			return err
 		}
 		time.Sleep(2*time.Second)
-		err = utils.LoadImages(containerID) 
+		err = utils.LoadImages(containerID, label) 
 		if err != nil {
 			return err
 		}

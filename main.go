@@ -21,6 +21,7 @@ var runtimeCommands = []*cli.Command{
 	// cluster-level
 	&cmd.CreateCommand,
 	&cmd.DeleteCommand,
+	&cmd.DeployCommand,
 }
 
 // func beforeSubcommands(c *cli.Context) error {

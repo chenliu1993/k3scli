@@ -72,7 +72,7 @@ func join(ctx context.Context, containerID, serverID string, detach bool) error 
                 return err
         }
         time.Sleep(2*time.Second)
-        return utils.LoadImages(containerID)
+        return utils.LoadImages(containerID, "worker")
 }
 
 	

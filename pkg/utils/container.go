@@ -32,6 +32,8 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 	if label != "" {
 		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
 	}
+	// for deploy pod to a specific node
+	ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("type=%s", containerID))
 	ctrCmd.Detach = detach
 	ctrCmd.Image = image
 	return ctrCmd.Run()
@@ -52,7 +54,7 @@ func Join(containerID, server, token string, detach bool) error {
 		"--token", token,
 	}
 	fmt.Print(ctrCmd.Args)
-	return ctrCmd.Exec()
+	return ctrCmd.Exec(nil,nil,nil)
 }
 
 
@@ -68,7 +70,7 @@ func AttachContainer(containerID string) error {
 	ctrCmd.Args = []string{
 		"/bin/sh",
 	}
-	return ctrCmd.Exec()
+	return ctrCmd.Exec(nil,nil,nil)
 }
 
 
@@ -103,5 +105,5 @@ func ExecInContainer(containerID, cmd string, detach bool) (err error) {
 			cmd,
 	}
 	// fmt.Print(ctrCmd.Args)
-	return ctrCmd.Exec()
+	return ctrCmd.Exec(nil,nil,nil)
 }
