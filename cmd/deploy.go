@@ -19,6 +19,14 @@ var DeployCommand = cli.Command{
 				Name:  "config, c",
 				Usage: `the pod config spec passed to server`,
 			},
+			&cli.BoolFlag{
+				Name: "redeploy",
+				Usage: `re-deploy the pod running in cluster`,
+			},
+			&cli.BoolFlag{
+				Name: "force",
+				Usage: `force replace a pod`,
+			},
         },
         Action: func(context *cli.Context) error {
 		ctx, err := cliContextToContext(context)
@@ -27,15 +35,24 @@ var DeployCommand = cli.Command{
 		}
 		return deploy(ctx, context.Args().First(),
 				context.String("config"),
+				context.Bool("redeploy"),
+				context.Bool("force"),
 			)
         },
 }
 
-func deploy(ctx context.Context, containerID, config string) error {
+func deploy(ctx context.Context, containerID, config string, redeploy, force bool) error {
 		log.Debugf("deploying pod through %s", containerID)
 		if config == "" {
 			log.Debug("no config file specified")
 			return fmt.Errorf("no pod config file specified")
+		}
+		if redeploy == true {
+			err := utils.ReDeployPod(containerID, config, force)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
         err := utils.DeployPod(containerID, config)
         if err != nil {

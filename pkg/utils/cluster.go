@@ -99,3 +99,18 @@ func DeployPod(containerID, config string) (err error) {
 	cmd := "k3s kubectl create -f "+config 
 	return ExecInContainer(containerID, cmd, true)
 }
+
+func ReDeployPod(containerID, config string, force bool) (err error) {
+	log.Debug("copying yaml file from host to container")
+	// first copy yaml file from host to container
+	err = CopyFromHostToCtr(containerID, config)
+	if err != nil {
+		return err
+	}
+	cmd := "k3s kubectl replace -f "
+	if force {
+		cmd = cmd+"--force "
+	} 
+	cmd = cmd+config
+	return ExecInContainer(containerID, cmd, true)
+}
