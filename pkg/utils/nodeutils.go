@@ -3,23 +3,25 @@ package utils
 import (
 	"fmt"
 	"time"
+
 	// "bytes"
-	"github.com/google/uuid"
+	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 	"path/filepath"
-	"io/ioutil"
-	log "github.com/sirupsen/logrus"
-	docker "github.com/chenliu1993/k3scli/pkg/dockerutils"
-	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
-)
+	"strings"
 
+	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
+	docker "github.com/chenliu1993/k3scli/pkg/dockerutils"
+	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
+)
 
 const (
-	DefaultArchivesPath = "/k3s"
+	DefaultArchivesPath   = "/k3s"
 	DefaultContainerdSock = "/run/k3s/containerd/containerd.sock"
 )
+
 // This file contains some node related functions like get server's ip and token
 
 // func Init() {
@@ -32,14 +34,14 @@ const (
 // GetServerToken get server token content
 func GetServerToken(containerID string) (string, error) {
 	log.Debug("read token out from k3s server files")
-	time.Sleep(10*time.Second)
+	time.Sleep(20 * time.Second)
 	// fileInfo, err := os.Stat(filepath.Join(docker.K3sServerFile, containerID, "server"))
 	// if err != nil {
 	// 	fmt.Print(err)
 	// 	return "", err
 	// }
 	// fmt.Print(fileInfo.Name())
-	// token place 
+	// token place
 	token := filepath.Join(docker.K3sServerFile, containerID, "server", "token")
 	bytes, err := ioutil.ReadFile(token)
 	if err != nil {
@@ -59,12 +61,12 @@ func GetServerIP(containerID string) (string, error) {
 		return "", err
 	}
 	// remove the unneccessary '
-	ip = ip[1:len(ip)-2]
-	server := "https://"+ip+":6443"
+	ip = ip[1 : len(ip)-2]
+	server := "https://" + ip + ":6443"
 	return server, nil
 }
 
-// GetClusterNames and returns it 
+// GetClusterNames and returns it
 func GetClusterNames(clusterName string) (lines []string, err error) {
 	// For now, only supports one server, so server name will be based on th cluster name
 	cmd := exec.Command(
@@ -89,7 +91,7 @@ func GetClusterNames(clusterName string) (lines []string, err error) {
 	return lines, nil
 }
 
-// Generate container a unique container name 
+// Generate container a unique container name
 func GenCtrName() string {
 	return uuid.New().String()
 }
@@ -98,27 +100,26 @@ func GenCtrName() string {
 func LoadImages(containerID string, role string) error {
 	log.Debug("loading images")
 	var findCmd string
+	loadCmd := "xargs -n1 k3s ctr -a " + DefaultContainerdSock + " images import"
 	// list image tars
 	if role == "server" {
-		findCmd = "find "+DefaultArchivesPath+" -name *.tar"
-	} else if role == "worker" {
-		findCmd = "find "+DefaultArchivesPath+" -name *-lb.tar"
-	}
-	loadCmd := "xargs -n1 k3s ctr -a "+DefaultContainerdSock+" images import"
-	Cmd := findCmd+" | "+loadCmd
-	err := ExecInContainer(containerID, Cmd, false)
-	if err != nil {
-		return err
-	}
-	if role == "worker" {
-		findCmd = "find "+DefaultArchivesPath+" -name pause.tar"
-		Cmd := findCmd+" | "+loadCmd
+		findCmd = "find " + DefaultArchivesPath + " -name *.tar"
+
+		Cmd := findCmd + " | " + loadCmd
 		err := ExecInContainer(containerID, Cmd, false)
 		if err != nil {
 			return err
 		}
-		findCmd = "find "+DefaultArchivesPath+" -name *traefik*.tar"
-		Cmd = findCmd+" | "+loadCmd
+	}
+	if role == "worker" {
+		findCmd = "find " + DefaultArchivesPath + " -name pause.tar"
+		Cmd := findCmd + " | " + loadCmd
+		err := ExecInContainer(containerID, Cmd, false)
+		if err != nil {
+			return err
+		}
+		findCmd = "find " + DefaultArchivesPath + " -name *traefik*.tar"
+		Cmd = findCmd + " | " + loadCmd
 		err = ExecInContainer(containerID, Cmd, false)
 		if err != nil {
 			return err
@@ -139,11 +140,11 @@ func StartK3S(containerID string) error {
 }
 
 // GenratePortMapping
-func GenratePortMapping(ports []clusterconfig.Port) ([]string) {
+func GenratePortMapping(ports []clusterconfig.Port) []string {
 	var portmappings []string
 	for _, port := range ports {
-		portmapping := port.Hostport+":"+port.Port
-		portmappings = append(portmappings,	portmapping)
+		portmapping := port.Hostport + ":" + port.Port
+		portmappings = append(portmappings, portmapping)
 	}
 	return portmappings
 }
@@ -167,15 +168,15 @@ func CopyFromHostToCtr(containerID, file string) (err error) {
 	// }
 	// then copy from buffer to container with the same name
 	ctrCmd := docker.ContainerCmd{
-		ID: containerID,
+		ID:      containerID,
 		Command: "docker",
-		Args: []string{"cp"},
+		Args:    []string{"cp"},
 	}
 	ctrCmd.Detach = true
-	ctrCmd.Args = append(ctrCmd.Args, 
-					filepath.Join(current, file),
-					containerID+":/"+file,
-				)
+	ctrCmd.Args = append(ctrCmd.Args,
+		filepath.Join(current, file),
+		containerID+":/"+file,
+	)
 	cmd := exec.Command(
 		ctrCmd.Command, ctrCmd.Args...,
 	)

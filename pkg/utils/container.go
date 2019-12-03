@@ -2,17 +2,19 @@ package utils
 
 import (
 	"fmt"
-	docker "github.com/chenliu1993/k3scli/pkg/dockerutils"
+
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
+	docker "github.com/chenliu1993/k3scli/pkg/dockerutils"
 	log "github.com/sirupsen/logrus"
 )
+
 const (
 	// NODE_VERSION = "0.10"
 	NODE_VERSION = "withimages"
-	NODE_IMAGE = "cliu2/k3snode:"+NODE_VERSION
+	NODE_IMAGE   = "cliu2/k3snode:" + NODE_VERSION
 
 	BASE_VERSION = "0.11"
-	BASE_IMAGE = "cliu2/k3sbase:"+BASE_VERSION
+	BASE_IMAGE   = "cliu2/k3sbase-mac:" + BASE_VERSION
 )
 
 // RunServerContainer used for wrap exec run
@@ -27,7 +29,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 		ctrCmd.Args = append(ctrCmd.Args, "-p", port)
 	}
 	if cluster != "" {
-		ctrCmd.Args =  append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterLabelKey, cluster))
+		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterLabelKey, cluster))
 	}
 	if label != "" {
 		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
@@ -42,7 +44,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 func Join(containerID, server, token string, detach bool) error {
 	log.Debug("generating docker exec cmd")
 	ctrCmd := docker.ContainerCmd{
-		ID: containerID,
+		ID:      containerID,
 		Command: "docker",
 	}
 	// Has to be true, because k3scli now it is not a input tty
@@ -54,14 +56,13 @@ func Join(containerID, server, token string, detach bool) error {
 		"--token", token,
 	}
 	fmt.Print(ctrCmd.Args)
-	return ctrCmd.Exec(nil,nil,nil)
+	return ctrCmd.Exec(nil, nil, nil)
 }
-
 
 func AttachContainer(containerID string) error {
 	log.Debug("generating docker exec cmd")
 	ctrCmd := docker.ContainerCmd{
-		ID: containerID,
+		ID:      containerID,
 		Command: "docker",
 	}
 	// Has to be false, because attach means interact with container
@@ -70,23 +71,21 @@ func AttachContainer(containerID string) error {
 	ctrCmd.Args = []string{
 		"/bin/sh",
 	}
-	return ctrCmd.Exec(nil,nil,nil)
+	return ctrCmd.Exec(nil, nil, nil)
 }
-
 
 func KillContainer(containerID, signal string) error {
 	log.Debug("generating docker exec cmd")
 	ctrCmd := docker.ContainerCmd{
-		ID: containerID,
+		ID:      containerID,
 		Command: "docker",
 	}
 	return ctrCmd.Kill(signal)
 }
 
-
 func InspectContainerIP(containerID string) (string, error) {
 	ctrCmd := docker.ContainerCmd{
-		ID :containerID,
+		ID:      containerID,
 		Command: "docker",
 		Args: []string{"inspect", "--format",
 			"'{{.NetworkSettings.IPAddress}}'"},
@@ -96,14 +95,14 @@ func InspectContainerIP(containerID string) (string, error) {
 
 func ExecInContainer(containerID, cmd string, detach bool) (err error) {
 	ctrCmd := docker.ContainerCmd{
-		ID: containerID,
+		ID:      containerID,
 		Command: "docker",
 	}
 	ctrCmd.Detach = detach
 	ctrCmd.Args = []string{
-			"sh", "-c",
-			cmd,
+		"sh", "-c",
+		cmd,
 	}
 	// fmt.Print(ctrCmd.Args)
-	return ctrCmd.Exec(nil,nil,nil)
+	return ctrCmd.Exec(nil, nil, nil)
 }

@@ -12,16 +12,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-var runtimeCommands = []*cli.Command{
+var runtimeCommands = []cli.Command{
 	// container-level
-	&cmd.RunCommand,
-	&cmd.JoinCommand,
-	&cmd.AttachCommand,
-	&cmd.KillCommand,
+	cmd.RunCommand,
+	cmd.JoinCommand,
+	cmd.AttachCommand,
+	cmd.KillCommand,
 	// cluster-level
-	&cmd.CreateCommand,
-	&cmd.DeleteCommand,
-	&cmd.DeployCommand,
+	cmd.CreateCommand,
+	cmd.DeleteCommand,
+	cmd.DeployCommand,
 }
 
 // func beforeSubcommands(c *cli.Context) error {

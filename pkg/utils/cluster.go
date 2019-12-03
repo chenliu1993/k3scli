@@ -2,10 +2,10 @@ package utils
 
 import (
 	"time"
-	log "github.com/sirupsen/logrus"
-	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
-)
 
+	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
+	log "github.com/sirupsen/logrus"
+)
 
 // CreateCluster creates a cluster given the default name
 func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error) {
@@ -29,8 +29,8 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
-	time.Sleep(2*time.Second)
-	err = LoadImages(serverName, "server") 
+	time.Sleep(30 * time.Second)
+	err = LoadImages(serverName, "server")
 	if err != nil {
 		return err
 	}
@@ -52,17 +52,17 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 			node.Name = name
 		} else {
 			name = node.Name
-		}		
+		}
 		workerPorts := GenratePortMapping(node.Ports)
-		err := RunContainer(name, "worker", true, BASE_IMAGE, workerPorts, clusterName)	
+		err := RunContainer(name, "worker", true, BASE_IMAGE, workerPorts, clusterName)
 		if err != nil {
 			return err
 		}
 		if err := Join(name, server, serverToken, true); err != nil {
 			return err
 		}
-		time.Sleep(3*time.Second)
-		err = LoadImages(name, "worker") 
+		time.Sleep(10 * time.Second)
+		err = LoadImages(name, "worker")
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func DeleteCluster(clusterName string) error {
 	if err != nil {
 		return err
 	}
-	for _, name := range names {	
+	for _, name := range names {
 		log.Debugf("killing container: %s", name)
 		err := KillContainer(name, "sigterm")
 		if err != nil {
@@ -96,7 +96,7 @@ func DeployPod(containerID, config string) (err error) {
 	if err != nil {
 		return err
 	}
-	cmd := "k3s kubectl create -f "+config 
+	cmd := "k3s kubectl create -f " + config
 	return ExecInContainer(containerID, cmd, true)
 }
 
@@ -109,8 +109,8 @@ func ReDeployPod(containerID, config string, force bool) (err error) {
 	}
 	cmd := "k3s kubectl replace -f "
 	if force {
-		cmd = cmd+"--force "
-	} 
-	cmd = cmd+config
+		cmd = cmd + "--force "
+	}
+	cmd = cmd + config
 	return ExecInContainer(containerID, cmd, true)
 }

@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"strings"
 	"context"
+	"strings"
 	"time"
+
 	"github.com/chenliu1993/k3scli/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -18,25 +19,25 @@ var RunCommand = cli.Command{
 	on your host.`,
 	Description: `The run command allows you to start a new k3sbase/k3snode container`,
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		cli.StringFlag{
 			Name:  "label, l",
 			Value: "",
 			Usage: `label used for docker run --label used for distinguishing from server to worker (primary)`,
 		},
-		&cli.BoolFlag{
+		cli.BoolFlag{
 			Name:  "detach, d",
 			Usage: `run in detach mode or not`,
 		},
-		&cli.StringFlag{
+		cli.StringFlag{
 			Name:  "image",
 			Usage: `image used`,
 		},
-		&cli.StringSliceFlag{
+		cli.StringSliceFlag{
 			Name:  "port, p",
 			Usage: `port mapping between container and host`,
 		},
-		&cli.StringFlag{
-			Name: "cluster",
+		cli.StringFlag{
+			Name:  "cluster",
 			Usage: `cluster this contaienr belongs to`,
 		},
 	},
@@ -92,11 +93,11 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 		if err != nil {
 			return err
 		}
-		time.Sleep(2*time.Second)
-		err = utils.LoadImages(containerID, label) 
+		time.Sleep(2 * time.Second)
+		err = utils.LoadImages(containerID, label)
 		if err != nil {
 			return err
 		}
-	} 
+	}
 	return nil
 }
