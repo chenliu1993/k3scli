@@ -52,6 +52,34 @@ func GetServerToken(containerID string) (string, error) {
 	return strings.TrimSpace(string(tokenStr)), nil
 }
 
+func GetServerTokenMac(containerID string) (string, error) {
+	// First copy token out from container
+	ctrCmd := docker.ContainerCmd{
+		ID:      containerID,
+		Command: "docker",
+		Args:    []string{"cp"},
+	}
+	ctrCmd.Detach = true
+	ctrCmd.Args = append(ctrCmd.Args,
+		containerID+":"+docker.K3sServerFileInContainer,
+		filepath.Join(docker.K3sServerFile, containerID),
+	)
+	cmd := exec.Command(
+		ctrCmd.Command, ctrCmd.Args...,
+	)
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+	// Second read from token file
+	bytes, err := ioutil.ReadFile(filepath.Join(docker.K3sServerFile, containerID, "token"))
+	if err != nil {
+		log.Debug(err)
+		return "", err
+	}
+	tokenStr := strings.Replace(string(bytes), "\n", "", -1)
+	return strings.TrimSpace(string(tokenStr)), nil
+}
+
 // GetServerIP get server internal IP through docker inspect
 func GetServerIP(containerID string) (string, error) {
 	log.Debug("get server ip from docker inspect")

@@ -38,7 +38,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
-	serverToken, err := GetServerToken(serverName)
+	serverToken, err := GetServerTokenMac(serverName)
 	if err != nil {
 		return err
 	}

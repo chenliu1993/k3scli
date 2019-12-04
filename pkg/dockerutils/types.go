@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	KubeCfgFolder    = "/tmp/k3s/configs"
-	K3sServerFile = "/tmp/k3s/files"
+	KubeCfgFolder            = "/tmp/k3s/configs"
+	K3sServerFile            = "/tmp/k3s/files"
+	K3sServerFileInContainer = "/var/lib/rancher/k3s/server/token"
 )
 
 // ContainerCmd used for wrapping an docker command
