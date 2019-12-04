@@ -14,7 +14,7 @@ const (
 	NODE_IMAGE   = "cliu2/k3snode:" + NODE_VERSION
 
 	BASE_VERSION = "0.11"
-	BASE_IMAGE   = "cliu2/k3sbase-mac:" + BASE_VERSION
+	BASE_IMAGE   = "cliu2/k3sbase:" + BASE_VERSION
 )
 
 // RunServerContainer used for wrap exec run
