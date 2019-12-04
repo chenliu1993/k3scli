@@ -53,6 +53,7 @@ func GetServerToken(containerID string) (string, error) {
 }
 
 func GetServerTokenMac(containerID string) (string, error) {
+	// time.Sleep(15 * time.Second)
 	// First copy token out from container
 	ctrCmd := docker.ContainerCmd{
 		ID:      containerID,
@@ -154,6 +155,14 @@ func LoadImages(containerID string, role string) error {
 		}
 	}
 	return nil
+}
+
+func LoadImagesMac(containerID string) error {
+	//for mac just load pause.tar is ok
+	findCmd := "find " + DefaultArchivesPath + " -name pause.tar"
+	loadCmd := "xargs -n1 k3s ctr -a " + DefaultContainerdSock + " images import"
+	cmd := findCmd + " | " + loadCmd
+	return ExecInContainer(containerID, cmd, false)
 }
 
 // StartK3S	starts k3s daemon service

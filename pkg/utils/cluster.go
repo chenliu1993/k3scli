@@ -29,8 +29,8 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
-	time.Sleep(30 * time.Second)
-	err = LoadImages(serverName, "server")
+	time.Sleep(15 * time.Second)
+	err = LoadImagesMac(serverName)
 	if err != nil {
 		return err
 	}
@@ -61,8 +61,8 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 		if err := Join(name, server, serverToken, true); err != nil {
 			return err
 		}
-		time.Sleep(10 * time.Second)
-		err = LoadImages(name, "worker")
+		time.Sleep(3 * time.Second)
+		err = LoadImagesMac(name)
 		if err != nil {
 			return err
 		}
