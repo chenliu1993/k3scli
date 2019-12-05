@@ -28,7 +28,10 @@ jobs:
       # - run: go test -v ./...
       - run:
           name: lint
-          command: gometalinter --config=.gometalinter.json ./... 
+          command: |
+            go get github.com/alecthomas/gometalinter
+            gometalinter --install --update
+            gometalinter --config=.gometalinter.json ./... 
       - run:
           name: building
           command: go build main.go        
