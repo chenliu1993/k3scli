@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"time"
 
 	// "bytes"
 	"io/ioutil"
@@ -24,35 +23,8 @@ const (
 
 // This file contains some node related functions like get server's ip and token
 
-// func Init() {
-// 	file, err := os.Open("/dev/urandom")
-//     if err != nil {
-//             panic(fmt.Sprintf("Failed to open urandom: %v", err))
-//     }
-//     uuid.SetRand(file)
-// }
 // GetServerToken get server token content
 func GetServerToken(containerID string) (string, error) {
-	log.Debug("read token out from k3s server files")
-	time.Sleep(20 * time.Second)
-	// fileInfo, err := os.Stat(filepath.Join(docker.K3sServerFile, containerID, "server"))
-	// if err != nil {
-	// 	fmt.Print(err)
-	// 	return "", err
-	// }
-	// fmt.Print(fileInfo.Name())
-	// token place
-	token := filepath.Join(docker.K3sServerFile, containerID, "server", "token")
-	bytes, err := ioutil.ReadFile(token)
-	if err != nil {
-		log.Debug(err)
-		return "", err
-	}
-	tokenStr := strings.Replace(string(bytes), "\n", "", -1)
-	return strings.TrimSpace(string(tokenStr)), nil
-}
-
-func GetServerTokenMac(containerID string) (string, error) {
 	// time.Sleep(15 * time.Second)
 	// First copy token out from container
 	ctrCmd := docker.ContainerCmd{
@@ -125,39 +97,8 @@ func GenCtrName() string {
 	return uuid.New().String()
 }
 
-// LoadImages use ctr to load images that is in the form of tar
-func LoadImages(containerID string, role string) error {
-	log.Debug("loading images")
-	var findCmd string
-	loadCmd := "xargs -n1 k3s ctr -a " + DefaultContainerdSock + " images import"
-	// list image tars
-	if role == "server" {
-		findCmd = "find " + DefaultArchivesPath + " -name *.tar"
-
-		Cmd := findCmd + " | " + loadCmd
-		err := ExecInContainer(containerID, Cmd, false)
-		if err != nil {
-			return err
-		}
-	}
-	if role == "worker" {
-		findCmd = "find " + DefaultArchivesPath + " -name pause.tar"
-		Cmd := findCmd + " | " + loadCmd
-		err := ExecInContainer(containerID, Cmd, false)
-		if err != nil {
-			return err
-		}
-		findCmd = "find " + DefaultArchivesPath + " -name *traefik*.tar"
-		Cmd = findCmd + " | " + loadCmd
-		err = ExecInContainer(containerID, Cmd, false)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func LoadImagesMac(containerID string) error {
+// LoadImages used for load images in tar
+func LoadImages(containerID string) error {
 	//for mac just load pause.tar is ok
 	findCmd := "find " + DefaultArchivesPath + " -name pause.tar"
 	loadCmd := "xargs -n1 k3s ctr -a " + DefaultContainerdSock + " images import"
