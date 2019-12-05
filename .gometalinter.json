@@ -1,0 +1,38 @@
+{
+    "Vendor": true,
+    "Deadline": "4m",
+    "Sort": [
+      "path",
+      "line",
+      "linter",
+      "severity"
+    ],
+    "Aggregate": true,
+    "DisableAll": true,
+    "Enable": [
+      "deadcode",
+      "dupl",
+      "gosec",
+      "goconst",
+      "gocyclo",
+      "gofmt",
+      "golint",
+      "ineffassign",
+      "misspell",
+      "nakedret",
+      "vet",
+      "vetshadow"
+    ],
+    "Cyclo": 15,
+    "Exclude": [
+      ".*.pb.go"
+    ],
+    "Skip": [
+      "build",
+      "vendor",
+      "support",
+      "vib"
+    ],
+    "DuplThreshold": 65
+  }
+  
