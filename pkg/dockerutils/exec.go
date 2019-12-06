@@ -1,13 +1,13 @@
 package dockerutils
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"os/exec"
-	"bytes"
-	"bufio"
-	log "github.com/sirupsen/logrus"
 )
 
 // Exec uses docker eec to actually exec a process in a container
@@ -49,9 +49,8 @@ func (c *ContainerCmd) Exec(in io.Reader, out, stderr io.Writer) error {
 	return nil
 }
 
-
 // ExecOutput save the output to strings
-func ExecOutput(cmd exec.Cmd, includeErr bool) (lines []string,err  error) {
+func ExecOutput(cmd exec.Cmd, includeErr bool) (lines []string, err error) {
 	var buf bytes.Buffer
 	if includeErr == true {
 		cmd.Stderr = &buf
@@ -68,6 +67,6 @@ func ExecOutput(cmd exec.Cmd, includeErr bool) (lines []string,err  error) {
 // PrintOutput print buffer output to stdout
 func PrintOutput(out []string) {
 	for _, line := range out {
-		fmt.Printf(line+"\n")
+		fmt.Printf(line + "\n")
 	}
 }

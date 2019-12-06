@@ -2,10 +2,10 @@ package dockerutils
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"path/filepath"
-	log "github.com/sirupsen/logrus"
 )
 
 // Run uses docker run to actually run a container
@@ -31,12 +31,12 @@ func (c *ContainerCmd) Run() error {
 	)
 	args = append(args, c.Args...)
 	if c.ID != "" {
-		args = append(args, 
+		args = append(args,
 			"--name", c.ID)
 	}
 	if c.Detach {
 		args = append(args, "-d")
-	} 
+	}
 	args = append(args, c.Image)
 	// fmt.Print(args)
 	cmd := exec.Command(c.Command, args...)
@@ -48,6 +48,6 @@ func (c *ContainerCmd) Run() error {
 		log.Fatal(err)
 		return err
 	}
-	
+
 	return nil
 }

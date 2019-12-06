@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"strings"
 	"context"
-	"time"
 	"github.com/chenliu1993/k3scli/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"strings"
+	"time"
 )
 
 // RunCommand wraps docker run for k3scli
@@ -36,7 +36,7 @@ var RunCommand = cli.Command{
 			Usage: `port mapping between container and host`,
 		},
 		&cli.StringFlag{
-			Name: "cluster",
+			Name:  "cluster",
 			Usage: `cluster this contaienr belongs to`,
 		},
 	},
@@ -92,11 +92,11 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 		if err != nil {
 			return err
 		}
-		time.Sleep(2*time.Second)
-		err = utils.LoadImages(containerID, label) 
+		time.Sleep(2 * time.Second)
+		err = utils.LoadImages(containerID, label)
 		if err != nil {
 			return err
 		}
-	} 
+	}
 	return nil
 }

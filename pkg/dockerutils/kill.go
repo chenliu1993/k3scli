@@ -17,8 +17,8 @@ func (c *ContainerCmd) Kill(signal string) error {
 	}
 	args = append(args,
 		"--signal", signal,
-		 c.ID,
-		)
+		c.ID,
+	)
 	cmd := exec.Command(c.Command, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

@@ -2,8 +2,8 @@ package config
 
 import (
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	yaml "gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 // Load loads a cluster config from a yaml file

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	KubeCfgFolder    = "/tmp/k3s/configs"
+	KubeCfgFolder = "/tmp/k3s/configs"
 	K3sServerFile = "/tmp/k3s/files"
 )
 

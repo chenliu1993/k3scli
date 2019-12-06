@@ -1,10 +1,10 @@
 package dockerutils
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
-	"bytes"
 
 	log "github.com/sirupsen/logrus"
 )
