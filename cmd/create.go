@@ -11,8 +11,7 @@ import (
 	"sort"
 )
 
-// Create command creates a cluster
-
+// CreateCommand creates a cluster
 var CreateCommand = cli.Command{
 	Name:        "create",
 	Usage:       "create a cluster based on config file",

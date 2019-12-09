@@ -8,8 +8,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Attach command attach io to a container
-
+// AttachCommand attach io to a container
 var AttachCommand = cli.Command{
 	Name:        "attach",
 	Usage:       "attach command attach io to a container",

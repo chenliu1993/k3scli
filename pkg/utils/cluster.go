@@ -20,7 +20,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	}
 	// deal with port mapping
 	serverPorts := GenratePortMapping(cluster.Nodes[0].Ports)
-	err = RunContainer(serverName, "server", true, BASE_IMAGE, serverPorts, clusterName)
+	err = RunContainer(serverName, "server", true, BaseImage, serverPorts, clusterName)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 			name = node.Name
 		}
 		workerPorts := GenratePortMapping(node.Ports)
-		err := RunContainer(name, "worker", true, BASE_IMAGE, workerPorts, clusterName)
+		err := RunContainer(name, "worker", true, BaseImage, workerPorts, clusterName)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,6 @@ func DeleteCluster(clusterName string) error {
 }
 
 // DeployPod deploys a pod based on a kubenetes-format yaml
-
 func DeployPod(containerID, config string) (err error) {
 	log.Debug("copying yaml file from host to container")
 	// first copy yaml file from host to container
@@ -99,6 +98,7 @@ func DeployPod(containerID, config string) (err error) {
 	return ExecInContainer(containerID, cmd, true)
 }
 
+// ReDeployPod used as update a existing pod's config and restart it.
 func ReDeployPod(containerID, config string, force bool) (err error) {
 	log.Debug("copying yaml file from host to container")
 	// first copy yaml file from host to container

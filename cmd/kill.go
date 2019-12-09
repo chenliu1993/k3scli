@@ -8,8 +8,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Kill command kill a contaienr and delete all files on host
-
+// KillCommand kill a contaienr and delete all files on host
 var KillCommand = cli.Command{
 	Name:        "kill",
 	Usage:       "attach command attach io to a container or send a signal to its init process",

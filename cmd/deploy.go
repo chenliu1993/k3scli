@@ -8,8 +8,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Deploy command deploy a pod based the config passed into server
-
+// DeployCommand deploy a pod based the config passed into server
 var DeployCommand = cli.Command{
 	Name:        "deploy",
 	Usage:       "deploy a pod based on a yaml format file",

@@ -16,19 +16,14 @@ import (
 )
 
 const (
-	DefaultArchivesPath   = "/k3s"
+	// DefaultArchivesPath is the path in container where image tars are stored.
+	DefaultArchivesPath = "/k3s"
+	// DefaultContainerdSock is the default containerd socket file in container.
 	DefaultContainerdSock = "/run/k3s/containerd/containerd.sock"
 )
 
 // This file contains some node related functions like get server's ip and token
 
-// func Init() {
-// 	file, err := os.Open("/dev/urandom")
-//     if err != nil {
-//             panic(fmt.Sprintf("Failed to open urandom: %v", err))
-//     }
-//     uuid.SetRand(file)
-// }
 // GetServerToken get server token content
 func GetServerToken(containerID string) (string, error) {
 	log.Debug("read token out from k3s server files")
@@ -89,7 +84,7 @@ func GetClusterNames(clusterName string) (lines []string, err error) {
 	return lines, nil
 }
 
-// Generate container a unique container name
+// GenCtrName generate container a unique container name
 func GenCtrName() string {
 	return uuid.New().String()
 }
@@ -127,7 +122,7 @@ func LoadImages(containerID string, role string) error {
 	return nil
 }
 
-// StartK3S	starts k3s daemon service
+// StartK3S starts k3s daemon service
 func StartK3S(containerID string) error {
 	log.Debug("starting k3s server")
 	startCmd := "nohup k3s server"
@@ -138,7 +133,10 @@ func StartK3S(containerID string) error {
 	return nil
 }
 
-// GenratePortMapping
+// GenratePortMapping takes inpout from config
+// and generates []string
+// with each component is a port mapping pair like:
+// -p 9000:9000
 func GenratePortMapping(ports []clusterconfig.Port) []string {
 	var portmappings []string
 	for _, port := range ports {

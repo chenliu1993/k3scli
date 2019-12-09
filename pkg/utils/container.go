@@ -9,14 +9,16 @@ import (
 
 const (
 	// NODE_VERSION = "0.10"
-	NODE_VERSION = "withimages"
-	NODE_IMAGE   = "cliu2/k3snode:" + NODE_VERSION
+	// NODE_VERSION = "withimages"
+	// NODE_IMAGE   = "cliu2/k3snode:" + NODE_VERSION
 
-	BASE_VERSION = "0.11"
-	BASE_IMAGE   = "cliu2/k3sbase:" + BASE_VERSION
+	// BaseVersion defines the version of k3sbase image.
+	BaseVersion = "0.11"
+	// BaseImage defines the image used by k3scli.
+	BaseImage = "cliu2/k3sbase:" + BaseVersion
 )
 
-// RunServerContainer used for wrap exec run
+// RunContainer used for wrap exec run
 func RunContainer(containerID string, label string, detach bool, image string, ports []string, cluster string) error {
 	log.Debug("generating docker run cmd")
 	ctrCmd := docker.ContainerCmd{
@@ -40,6 +42,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 	return ctrCmd.Run()
 }
 
+// Join used as join interface for a agent to join the server node.
 func Join(containerID, server, token string, detach bool) error {
 	log.Debug("generating docker exec cmd")
 	ctrCmd := docker.ContainerCmd{
@@ -58,6 +61,8 @@ func Join(containerID, server, token string, detach bool) error {
 	return ctrCmd.Exec(nil, nil, nil)
 }
 
+// AttachContainer attatches io to a container.
+// warpper for docker exec.
 func AttachContainer(containerID string) error {
 	log.Debug("generating docker exec cmd")
 	ctrCmd := docker.ContainerCmd{
@@ -73,6 +78,7 @@ func AttachContainer(containerID string) error {
 	return ctrCmd.Exec(nil, nil, nil)
 }
 
+// KillContainer kills a container.
 func KillContainer(containerID, signal string) error {
 	log.Debug("generating docker exec cmd")
 	ctrCmd := docker.ContainerCmd{
@@ -82,6 +88,7 @@ func KillContainer(containerID, signal string) error {
 	return ctrCmd.Kill(signal)
 }
 
+// InspectContainerIP returns the ip of a container.
 func InspectContainerIP(containerID string) (string, error) {
 	ctrCmd := docker.ContainerCmd{
 		ID:      containerID,
@@ -92,6 +99,7 @@ func InspectContainerIP(containerID string) (string, error) {
 	return ctrCmd.Inspect()
 }
 
+// ExecInContainer executes a command in the target container.
 func ExecInContainer(containerID, cmd string, detach bool) (err error) {
 	ctrCmd := docker.ContainerCmd{
 		ID:      containerID,

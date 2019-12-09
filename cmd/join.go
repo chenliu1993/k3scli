@@ -8,14 +8,13 @@ import (
 	"time"
 )
 
-// Join command combines run and join.
-// Used to join a k3s worker node to a server
-
 var (
 	// May needs perfecting
 	defaultPorts = []string{}
 )
 
+// JoinCommand combines run and join.
+// Used to join a k3s worker node to a server
 var JoinCommand = cli.Command{
 	Name:        "join",
 	Usage:       "join a k3sbase container to a existing a server",
@@ -53,7 +52,7 @@ func join(ctx context.Context, containerID, serverID string, detach bool) error 
 	// First run a worker container
 	log.Debug("run worker container")
 	// Detach has to be true, other wise the join action cannot execute.
-	err := run(ctx, containerID, "worker", true, utils.BASE_IMAGE, defaultPorts, "")
+	err := run(ctx, containerID, "worker", true, utils.BaseImage, defaultPorts, "")
 	if err != nil {
 		log.Debug(err)
 		return err

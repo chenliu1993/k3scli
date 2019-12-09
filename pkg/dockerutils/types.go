@@ -6,7 +6,9 @@ import (
 )
 
 const (
+	// KubeCfgFolder used as volume folder on host to store server config.
 	KubeCfgFolder = "/tmp/k3s/configs"
+	// K3sServerFile used as volume folder to store serve files like token.
 	K3sServerFile = "/tmp/k3s/files"
 )
 
