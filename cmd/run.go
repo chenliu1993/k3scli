@@ -63,7 +63,7 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 	}
 	if image == "" {
 		log.Debug("k3s image not set, default to node")
-		image = utils.NODE_IMAGE
+		image = utils.BaseImage
 	}
 	if label == "server" && strings.Index(image, "base") != -1 {
 		log.Fatal("base image cannot serve as server")
