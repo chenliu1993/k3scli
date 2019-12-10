@@ -24,16 +24,6 @@ var runtimeCommands = []*cli.Command{
 	&cmd.DeployCommand,
 }
 
-// func beforeSubcommands(c *cli.Context) error {
-// 	loglevel := c.
-// 	level, err := log.ParseLevel(loglevel)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	log.SetLevel(level)
-// 	return nil
-// }
-
 func main() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -53,6 +43,14 @@ func main() {
 			Name:  "log-level",
 			Value: "info",
 		},
+	}
+	cliApp.Action = func (c *cli.Context) error {
+		level, err := log.ParseLevel(c.String("log-level"))
+		if err != nil {
+			return err
+		}
+		log.SetLevel(level)
+		return nil
 	}
 	err := cliApp.Run(os.Args)
 	if err != nil {
