@@ -39,6 +39,10 @@ var RunCommand = cli.Command{
 			Name:  "cluster",
 			Usage: `cluster this contaienr belongs to`,
 		},
+		&cli.StringFlag{
+			Name:  "mode",
+			Usage: `container runtime used`,
+		},
 	},
 	Action: func(context *cli.Context) error {
 		ctx, err := cliContextToContext(context)
@@ -51,11 +55,12 @@ var RunCommand = cli.Command{
 			context.String("image"),
 			context.StringSlice("port"),
 			context.String("cluster"),
+			context.String("mode"),
 		)
 	},
 }
 
-func run(ctx context.Context, containerID, label string, detach bool, image string, ports []string, cluster string) error {
+func run(ctx context.Context, containerID, label string, detach bool, image string, ports []string, cluster string, mode string) error {
 	log.Debug("begin running container")
 	if label == "" {
 		log.Debug("role of container is not set, default to server")
@@ -84,7 +89,10 @@ func run(ctx context.Context, containerID, label string, detach bool, image stri
 	if cluster == "" {
 		log.Debug("no cluster specified")
 	}
-	if err := utils.RunContainer(containerID, label, detach, image, ports, cluster); err != nil {
+	if mode == "" {
+		mode = "containerd"
+	}
+	if err := utils.RunContainer(containerID, label, detach, image, ports, cluster, mode); err != nil {
 		return err
 	}
 	if label == "server" {

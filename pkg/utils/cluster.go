@@ -20,7 +20,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	}
 	// deal with port mapping
 	serverPorts := GenratePortMapping(cluster.Nodes[0].Ports)
-	err = RunContainer(serverName, "server", true, BaseImage, serverPorts, clusterName)
+	err = RunContainer(serverName, "server", true, BaseImage, serverPorts, clusterName, "docker")
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 			name = node.Name
 		}
 		workerPorts := GenratePortMapping(node.Ports)
-		err := RunContainer(name, "worker", true, BaseImage, workerPorts, clusterName)
+		err := RunContainer(name, "worker", true, BaseImage, workerPorts, clusterName, "docker")
 		if err != nil {
 			return err
 		}

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
+	containerd "github.com/chenliu1993/k3scli/pkg/containerdutils"
 	docker "github.com/chenliu1993/k3scli/pkg/dockerutils"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,27 +20,45 @@ const (
 )
 
 // RunContainer used for wrap exec run
-func RunContainer(containerID string, label string, detach bool, image string, ports []string, cluster string) error {
-	log.Debug("generating docker run cmd")
-	ctrCmd := docker.ContainerCmd{
-		ID:      containerID,
-		Command: "docker",
+func RunContainer(containerID string, label string, detach bool, image string, ports []string, cluster string, mode string) (err error) {
+	log.Debug("generating run cmd")
+	if mode == "docker" {
+		ctrCmd := docker.ContainerCmd{
+			ID:      containerID,
+			Command: "docker",
+		}
+		ctrCmd.Args = []string{}
+		for _, port := range ports {
+			ctrCmd.Args = append(ctrCmd.Args, "-p", port)
+		}
+		if cluster != "" {
+			ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterLabelKey, cluster))
+		}
+		if label != "" {
+			ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
+		}
+		// for deploy pod to a specific node
+		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("type=%s", containerID))
+		ctrCmd.Detach = detach
+		ctrCmd.Image = image
+		err = ctrCmd.Run()
+	} else if mode == "containerd" {
+		ctrCmd := containerd.ContainerdCmd{
+			ID: containerID,
+			Command: "ctr",
+		}
+		ctrCmd.Args = []string{}
+		if cluster != "" {
+			ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterLabelKey, cluster))
+		}
+		if label != "" {
+			ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
+		}
+		// for deploy pod to a specific node
+		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("type=%s", containerID))
+		err = ctrCmd.Run()
 	}
-	ctrCmd.Args = []string{}
-	for _, port := range ports {
-		ctrCmd.Args = append(ctrCmd.Args, "-p", port)
-	}
-	if cluster != "" {
-		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterLabelKey, cluster))
-	}
-	if label != "" {
-		ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("%s=%s", clusterconfig.ClusterRole, cluster+"-"+label))
-	}
-	// for deploy pod to a specific node
-	ctrCmd.Args = append(ctrCmd.Args, "--label", fmt.Sprintf("type=%s", containerID))
-	ctrCmd.Detach = detach
-	ctrCmd.Image = image
-	return ctrCmd.Run()
+	return err
 }
 
 // Join used as join interface for a agent to join the server node.

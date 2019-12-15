@@ -52,7 +52,7 @@ func join(ctx context.Context, containerID, serverID string, detach bool) error 
 	// First run a worker container
 	log.Debug("run worker container")
 	// Detach has to be true, other wise the join action cannot execute.
-	err := run(ctx, containerID, "worker", true, utils.BaseImage, defaultPorts, "")
+	err := run(ctx, containerID, "worker", true, utils.BaseImage, defaultPorts, "", "docker")
 	if err != nil {
 		log.Debug(err)
 		return err
