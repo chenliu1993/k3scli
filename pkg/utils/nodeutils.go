@@ -46,16 +46,17 @@ func GetServerToken(containerID string) (string, error) {
 }
 
 // GetServerIP get server internal IP through docker inspect
-func GetServerIP(containerID string) (string, error) {
-	log.Debug("get server ip from docker inspect")
-	ip, err := InspectContainerIP(containerID)
+func GetServerIP(containerID, mode string) (server string, err error) {
+	log.Debug("get server ip")
+	ip, err := InspectContainerIP(containerID, mode)
 	if err != nil {
 		log.Debug(err)
 		return "", err
 	}
 	// remove the unneccessary '
 	ip = ip[1 : len(ip)-2]
-	server := "https://" + ip + ":6443"
+	server = "https://" + ip + ":6443"	
+	
 	return server, nil
 }
 
@@ -155,15 +156,6 @@ func CopyFromHostToCtr(containerID, file string) (err error) {
 	if err != nil {
 		return err
 	}
-	// first copy host file's content into buffer
-	// cmd := exec.Command(
-	// 	"cat", filepath.Join(current, file),
-	// )
-	// cmd.Stdout = &buff
-	// if err = cmd.Run(); err != nil {
-	// 	return err
-	// }
-	// then copy from buffer to container with the same name
 	ctrCmd := docker.ContainerCmd{
 		ID:      containerID,
 		Command: "docker",
@@ -178,13 +170,4 @@ func CopyFromHostToCtr(containerID, file string) (err error) {
 		ctrCmd.Command, ctrCmd.Args...,
 	)
 	return cmd.Run()
-	// ctrCmd.Args = []string{
-	// 	"cp", "/dev/stdin",
-	// 	file,
-	// }
-	// ctrCmd.Detach = true
-	// if err = ctrCmd.Exec(&buff,nil,nil); err != nil {
-	// 	return err
-	// }
-	// return nil
 }

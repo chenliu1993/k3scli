@@ -63,7 +63,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 
 // Join used as join interface for a agent to join the server node.
 func Join(containerID, server, token string, detach bool) error {
-	log.Debug("generating docker exec cmd")
+	log.Debug("generating exec cmd")
 	ctrCmd := docker.ContainerCmd{
 		ID:      containerID,
 		Command: "docker",
@@ -108,14 +108,24 @@ func KillContainer(containerID, signal string) error {
 }
 
 // InspectContainerIP returns the ip of a container.
-func InspectContainerIP(containerID string) (string, error) {
-	ctrCmd := docker.ContainerCmd{
-		ID:      containerID,
-		Command: "docker",
-		Args: []string{"inspect", "--format",
-			"'{{.NetworkSettings.IPAddress}}'"},
+func InspectContainerIP(containerID, mode string) (ip string, err error) {
+	if mode == "docker" {
+		ctrCmd := docker.ContainerCmd{
+			ID:      containerID,
+			Command: "docker",
+			Args: []string{"inspect", "--format",
+				"'{{.NetworkSettings.IPAddress}}'"},
+		}
+		ip, err = ctrCmd.Inspect()
+	} else if mode == "containerd" {
+		ctrCmd := containerd.ContainerCmd{
+			ID: containerID,
+			Command: "ctr",
+			Args: []string{},
+		}
+		ip, err = GetCtrIP()
 	}
-	return ctrCmd.Inspect()
+	return ip, err
 }
 
 // ExecInContainer executes a command in the target container.
@@ -131,4 +141,9 @@ func ExecInContainer(containerID, cmd string, detach bool) (err error) {
 	}
 	// fmt.Print(ctrCmd.Args)
 	return ctrCmd.Exec(nil, nil, nil)
+}
+
+// GetCtrIP is the containerd-version of get server ip
+func GetCtrIP() (ip string, err error) {
+	
 }

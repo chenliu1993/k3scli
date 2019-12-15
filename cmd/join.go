@@ -26,10 +26,10 @@ var JoinCommand = cli.Command{
 			Value: "",
 			Usage: `server container id`,
 		},
-		// &cli.StringFlag{
-		//         Name:  "token, t",
-		//         Usage: `server token resides in /var/lib/rancher/k3s/server/node-token on server container`,
-		// },
+		&cli.StringFlag{
+		        Name:  "mode, m",
+		        Usage: `using conatinerd or docker`,
+		},
 		&cli.BoolFlag{
 			Name:  "detach, d",
 			Usage: `detach mode`,
@@ -43,34 +43,35 @@ var JoinCommand = cli.Command{
 		return join(ctx, context.Args().First(),
 			context.String("server-id"),
 			context.Bool("detach"),
+			context.String("mode"),
 		)
 	},
 }
 
-func join(ctx context.Context, containerID, serverID string, detach bool) error {
+func join(ctx context.Context, containerID, serverID string, detach bool, mode string) error {
 	log.Debug("Begin join server node, first checking args")
 	// First run a worker container
 	log.Debug("run worker container")
 	// Detach has to be true, other wise the join action cannot execute.
-	err := run(ctx, containerID, "worker", true, utils.BaseImage, defaultPorts, "", "docker")
+	err := run(ctx, containerID, "worker", true, utils.BaseImage, defaultPorts, "", mode)
 	if err != nil {
 		log.Debug(err)
 		return err
 	}
-	server, err := utils.GetServerIP(serverID)
+	server, err := utils.GetServerIP(serverID, mode)
 	if err != nil {
 		log.Debug(err)
 		return err
 	}
-	token, err := utils.GetServerToken(serverID)
+	token, err := utils.GetServerToken(serverID, mode)
 	if err != nil {
 		log.Debug(err)
 		return err
 	}
 	// Second join to server container
-	if err := utils.Join(containerID, server, token, detach); err != nil {
+	if err := utils.Join(containerID, server, token, detach, mode); err != nil {
 		return err
 	}
 	time.Sleep(2 * time.Second)
-	return utils.LoadImages(containerID, "worker")
+	return utils.LoadImages(containerID, "worker", mode)
 }
