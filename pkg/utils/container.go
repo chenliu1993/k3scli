@@ -43,7 +43,7 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 		ctrCmd.Image = image
 		err = ctrCmd.Run()
 	} else if mode == "containerd" {
-		ctrCmd := containerd.ContainerdCmd{
+		ctrCmd := containerd.ContainerCmd{
 			ID: containerID,
 			Command: "ctr",
 		}
