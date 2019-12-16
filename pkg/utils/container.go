@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	clusterconfig "github.com/chenliu1993/k3scli/pkg/config/cluster"
 	containerd "github.com/chenliu1993/k3scli/pkg/containerdutils"
@@ -62,22 +63,36 @@ func RunContainer(containerID string, label string, detach bool, image string, p
 }
 
 // Join used as join interface for a agent to join the server node.
-func Join(containerID, server, token string, detach bool) error {
+func Join(containerID, server, token string, detach bool, mode string) (err error) {
 	log.Debug("generating exec cmd")
-	ctrCmd := docker.ContainerCmd{
-		ID:      containerID,
-		Command: "docker",
+	if mode == "docker" {
+		ctrCmd := docker.ContainerCmd{
+			ID:      containerID,
+			Command: "docker",
+		}
+		// Has to be true, because k3scli now it is not a input tty
+		ctrCmd.Detach = detach
+		// k3s agent --server https://myserver:6443 --token ${NODE_TOKEN}
+		ctrCmd.Args = []string{
+			"k3s", "agent",
+			"--server", server,
+			"--token", token,
+		}
+		err = ctrCmd.Exec(nil, nil, nil)
+	} else if mode == "containerd" {
+		ctrCmd := containerd.ContainerCmd{
+			ID: containerID,
+			Command: "ctr",
+		}
+		// k3s agent --server https://myserver:6443 --token ${NODE_TOKEN}
+		ctrCmd.Args = []string{
+			"k3s", "agent",
+			"--server", server,
+			"--token", token,
+		}
+		err = ctrCmd.Exec()
 	}
-	// Has to be true, because k3scli now it is not a input tty
-	ctrCmd.Detach = detach
-	// k3s agent --server https://myserver:6443 --token ${NODE_TOKEN}
-	ctrCmd.Args = []string{
-		"k3s", "agent",
-		"--server", server,
-		"--token", token,
-	}
-	fmt.Print(ctrCmd.Args)
-	return ctrCmd.Exec(nil, nil, nil)
+	return err
 }
 
 // AttachContainer attatches io to a container.
@@ -118,32 +133,58 @@ func InspectContainerIP(containerID, mode string) (ip string, err error) {
 		}
 		ip, err = ctrCmd.Inspect()
 	} else if mode == "containerd" {
-		ctrCmd := containerd.ContainerCmd{
-			ID: containerID,
-			Command: "ctr",
-			Args: []string{},
-		}
-		ip, err = GetCtrIP()
+		ip, err = GetCtrIP(containerID)
 	}
 	return ip, err
 }
 
 // ExecInContainer executes a command in the target container.
-func ExecInContainer(containerID, cmd string, detach bool) (err error) {
-	ctrCmd := docker.ContainerCmd{
-		ID:      containerID,
-		Command: "docker",
+func ExecInContainer(containerID, cmd string, detach bool, mode string) (err error) {
+	if mode == "docker" {
+		ctrCmd := docker.ContainerCmd{
+			ID:      containerID,
+			Command: "docker",
+		}
+		ctrCmd.Detach = detach
+		ctrCmd.Args = []string{
+			"sh", "-c",
+			cmd,
+		}
+		err = ctrCmd.Exec(nil, nil, nil)
+	} else if mode == "containerd" {
+		ctrCmd := containerd.ContainerCmd{
+			ID: containerID,
+			Command: "ctr",
+		}
+		ctrCmd.Args = []string{
+			"sh", "-c",
+			cmd,
+		}
+		err = ctrCmd.Exec()
 	}
-	ctrCmd.Detach = detach
-	ctrCmd.Args = []string{
-		"sh", "-c",
-		cmd,
-	}
-	// fmt.Print(ctrCmd.Args)
-	return ctrCmd.Exec(nil, nil, nil)
+	return err
 }
 
 // GetCtrIP is the containerd-version of get server ip
-func GetCtrIP() (ip string, err error) {
-	
+func GetCtrIP(containerID string) (ip string, err error) {
+	ifconfigCmd := "ifconfig eth0"
+	sedCmd := "sed -nr '2s/[^0-9\\.]+/\n/gp'"
+	sedIPCmd := "sed -n 2p"
+	Cmd := ifconfigCmd + " | " + sedCmd + " | " + sedIPCmd
+	// buffer for storing IP
+	info := ""
+	infoBuf := bytes.NewBufferString(info)
+	ctrCmd := containerd.ContainerCmd{
+		ID: containerID,
+		Command: "ctr",
+		Args: []string{
+			"sh", "-c",
+			Cmd,
+		},
+	}
+	ctrCmd.SetStdout(infoBuf)
+	if err := ctrCmd.Exec(); err != nil {
+		return "", err
+	}
+	return infoBuf.String(), nil
 }

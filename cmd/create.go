@@ -22,6 +22,10 @@ var CreateCommand = cli.Command{
 			Name:  "config",
 			Usage: `the config file used to created a cluster`,
 		},
+		&cli.StringFlag{
+			Name:  "mode",
+			Usage: `containerd or docker`,
+		},
 	},
 	Action: func(context *cli.Context) error {
 		ctx, err := cliContextToContext(context)
@@ -30,11 +34,12 @@ var CreateCommand = cli.Command{
 		}
 		return createcluster(ctx, context.Args().First(),
 			context.String("config"),
+			context.String("mode"),
 		)
 	},
 }
 
-func createcluster(ctx context.Context, clusterName, config string) error {
+func createcluster(ctx context.Context, clusterName, config, mode string) error {
 	log.Debug("Begin creating a cluster")
 	var cluster clusterconfig.Cluster
 	var err error
@@ -50,7 +55,7 @@ func createcluster(ctx context.Context, clusterName, config string) error {
 	sort.Slice(cluster.Nodes, func(i int, j int) bool {
 		return cluster.Nodes[i].Label < cluster.Nodes[j].Label
 	})
-	err = utils.CreateCluster(clusterName, cluster)
+	err = utils.CreateCluster(clusterName, mode, cluster)
 	if err != nil {
 		log.Debug(err)
 		return err

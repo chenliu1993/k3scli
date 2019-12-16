@@ -7,7 +7,7 @@ import (
 )
 
 // CreateCluster creates a cluster given the default name
-func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error) {
+func CreateCluster(clusterName, mode string, cluster clusterconfig.Cluster) (err error) {
 	log.Debug("Creating cluster...")
 	var name string
 	var serverName string
@@ -24,16 +24,16 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 	if err != nil {
 		return err
 	}
-	err = StartK3S(serverName)
+	err = StartK3S(serverName, mode)
 	if err != nil {
 		return err
 	}
 	time.Sleep(2 * time.Second)
-	err = LoadImages(serverName, "server")
+	err = LoadImages(serverName, "server", mode)
 	if err != nil {
 		return err
 	}
-	server, err := GetServerIP(serverName)
+	server, err := GetServerIP(serverName, "docker")
 	if err != nil {
 		return err
 	}
@@ -57,11 +57,11 @@ func CreateCluster(clusterName string, cluster clusterconfig.Cluster) (err error
 		if err != nil {
 			return err
 		}
-		if err := Join(name, server, serverToken, true); err != nil {
+		if err := Join(name, server, serverToken, true, "docker"); err != nil {
 			return err
 		}
 		time.Sleep(3 * time.Second)
-		err = LoadImages(name, "worker")
+		err = LoadImages(name, "worker", mode)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func DeployPod(containerID, config string) (err error) {
 		return err
 	}
 	cmd := "k3s kubectl create -f " + config
-	return ExecInContainer(containerID, cmd, true)
+	return ExecInContainer(containerID, cmd, true, "docker")
 }
 
 // ReDeployPod used as update a existing pod's config and restart it.
@@ -111,5 +111,5 @@ func ReDeployPod(containerID, config string, force bool) (err error) {
 		cmd = cmd + "--force "
 	}
 	cmd = cmd + config
-	return ExecInContainer(containerID, cmd, true)
+	return ExecInContainer(containerID, cmd, true, "docker")
 }

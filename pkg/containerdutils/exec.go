@@ -1,18 +1,26 @@
 package containerdutils
 
 import (
+	"strconv"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io"
 	"os/exec"
 )
 
+var (
+	// ExecID used for storing --exec-id
+	ExecID = 1
+)
+
 // Exec uses containerd exec to actually exec a process in a container
-func (c *ContainerCmd) Exec(in io.Reader, out, stderr io.Writer) error {
+func (c *ContainerCmd) Exec() error {
 	args := []string{
 		"tasks",
 		"exec",
 	}
+	ExecID = ExecID + 1
+	args = append(args, "--exec-id",
+				strconv.Itoa(ExecID))
 	args = append(args, c.ID)
 	args = append(args, c.Args...)
 	cmd := exec.Command(c.Command, args...)
@@ -26,6 +34,7 @@ func (c *ContainerCmd) Exec(in io.Reader, out, stderr io.Writer) error {
 		cmd.Stdin = c.Stdin
 	}
 	log.Debug(fmt.Sprintf("begin exec process in container: %s", c.ID))
+	fmt.Print(args)
 	err := cmd.Run()
 	if err != nil {
 		log.Debug(err)

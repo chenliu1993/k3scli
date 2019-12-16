@@ -63,7 +63,7 @@ func join(ctx context.Context, containerID, serverID string, detach bool, mode s
 		log.Debug(err)
 		return err
 	}
-	token, err := utils.GetServerToken(serverID, mode)
+	token, err := utils.GetServerToken(serverID)
 	if err != nil {
 		log.Debug(err)
 		return err

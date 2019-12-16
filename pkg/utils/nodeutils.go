@@ -25,16 +25,9 @@ const (
 // This file contains some node related functions like get server's ip and token
 
 // GetServerToken get server token content
-func GetServerToken(containerID string) (string, error) {
+func GetServerToken(containerID string) (t string,err error) {
 	log.Debug("read token out from k3s server files")
 	time.Sleep(10 * time.Second)
-	// fileInfo, err := os.Stat(filepath.Join(docker.K3sServerFile, containerID, "server"))
-	// if err != nil {
-	// 	fmt.Print(err)
-	// 	return "", err
-	// }
-	// fmt.Print(fileInfo.Name())
-	// token place
 	token := filepath.Join(docker.K3sServerFile, containerID, "server", "token")
 	bytes, err := ioutil.ReadFile(token)
 	if err != nil {
@@ -42,7 +35,8 @@ func GetServerToken(containerID string) (string, error) {
 		return "", err
 	}
 	tokenStr := strings.Replace(string(bytes), "\n", "", -1)
-	return strings.TrimSpace(string(tokenStr)), nil
+	t = strings.TrimSpace(string(tokenStr))
+	return t, err
 }
 
 // GetServerIP get server internal IP through docker inspect
@@ -53,10 +47,11 @@ func GetServerIP(containerID, mode string) (server string, err error) {
 		log.Debug(err)
 		return "", err
 	}
-	// remove the unneccessary '
-	ip = ip[1 : len(ip)-2]
+	if mode == "docker" {
+		// remove the unneccessary '
+		ip = ip[1 : len(ip)-2]
+	}
 	server = "https://" + ip + ":6443"	
-	
 	return server, nil
 }
 
@@ -78,10 +73,6 @@ func GetClusterNames(clusterName string) (lines []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	// currentlt only supports one server
-	// if len(lines) != 1 {
-	// 	return nil, fmt.Errorf("k3scli don't support multiserver now...")
-	// }
 	return lines, nil
 }
 
@@ -91,7 +82,7 @@ func GenCtrName() string {
 }
 
 // LoadImages use ctr to load images that is in the form of tar
-func LoadImages(containerID string, role string) error {
+func LoadImages(containerID, role, mode string) (err error) {
 	log.Debug("loading images")
 	var findCmd string
 	// list image tars
@@ -102,32 +93,32 @@ func LoadImages(containerID string, role string) error {
 	}
 	loadCmd := "xargs -n1 k3s ctr -a " + DefaultContainerdSock + " images import"
 	Cmd := findCmd + " | " + loadCmd
-	err := ExecInContainer(containerID, Cmd, false)
+	err = ExecInContainer(containerID, Cmd, false, mode)
 	if err != nil {
 		return err
 	}
 	if role == "worker" {
 		findCmd = "find " + DefaultArchivesPath + " -name pause.tar"
 		Cmd := findCmd + " | " + loadCmd
-		err := ExecInContainer(containerID, Cmd, false)
+		err := ExecInContainer(containerID, Cmd, false, mode)
 		if err != nil {
 			return err
 		}
 		findCmd = "find " + DefaultArchivesPath + " -name *traefik*.tar"
 		Cmd = findCmd + " | " + loadCmd
-		err = ExecInContainer(containerID, Cmd, false)
+		err = ExecInContainer(containerID, Cmd, false, mode)
 		if err != nil {
 			return err
 		}
 	}
-	return nil
+	return err
 }
 
 // StartK3S starts k3s daemon service
-func StartK3S(containerID string) error {
+func StartK3S(containerID, mode string) error {
 	log.Debug("starting k3s server")
 	startCmd := "nohup k3s server"
-	err := ExecInContainer(containerID, startCmd, true)
+	err := ExecInContainer(containerID, startCmd, true, mode)
 	if err != nil {
 		return err
 	}
