@@ -3,6 +3,7 @@
 ## Introduction:
 	k3scli is a command tool based on docker like kind(kubernetes-in-docker) but uses images with k3s in it.
 	Currently it is just a tool under developing.
+	Faster than Kind, lighter than Kind.
 
 ## Build
 	```console
@@ -33,7 +34,12 @@
 	2. worker roles show-up (k3s without container does not show up worker roles too).
 	3. pack neccessary images in tar format like kind (done).
 	4. remove docker support to use containerd?
+	5. modify codes architecture and quality before adding new functions on master.
 ## STUCK:	
 	China's GFW.
+## Branches:
+	1. master is the main branch.
+	2. topic/chenliu1993/macos is the MacOS version.
+	3. topic/chenliu1993/containerd is the container as runtime version (releaizing...) 
 
 
